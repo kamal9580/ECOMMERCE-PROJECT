@@ -7,4 +7,6 @@ const app=express.Router();
 app.post("/new",newUser)///new pahle kam nhi karta lekin ab iska route hoga
 
 
+
+
 export default app;

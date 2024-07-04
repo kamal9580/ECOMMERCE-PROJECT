@@ -9,13 +9,22 @@
   //importing routes
   import userRoute from "./routes/user.js";
 
+import { connectDB } from "./utils/features.js";
+
   const port = 4000;
 
+  connectDB();
+
   const app = express();
+  app.use(express.json());
+
+  app.get("/",(req,res) => {
+    res.send("apt working with /api/v1");
+  })
 
   //using routes
    app.use("/api/v1/user", userRoute);//iska mtlab hoi gya ki userRoute /api/v1/user ko use kar rha hai
 
   app.listen(port,()=>{
-    console.log(`server is running on http://localhost:${port}`);
+    console.log(` express is running on http://localhost:${port}`);
   });

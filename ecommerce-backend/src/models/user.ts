@@ -1,5 +1,3 @@
-    
-   
 import mongoose from "mongoose";
 import validator from "validator";
 
@@ -111,3 +109,4 @@ return age;: This returns the computed age. */
     })
 
     export const User = mongoose.model<IUser>("User",schema);
+
