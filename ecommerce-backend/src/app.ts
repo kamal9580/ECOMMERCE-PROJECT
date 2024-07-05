@@ -6,10 +6,12 @@
     // The dist folder is the designated location for these compiled JavaScript files.
   
   import express from "express";
-  //importing routes
-  import userRoute from "./routes/user.js";
-
 import { connectDB } from "./utils/features.js";
+import { errorMiddleware } from "./middlewares/error.js";
+
+ //importing routes
+ import userRoute from "./routes/user.js";
+ import ProductRoute from "./routes/products.js";
 
   const port = 4000;
 
@@ -24,6 +26,11 @@ import { connectDB } from "./utils/features.js";
 
   //using routes
    app.use("/api/v1/user", userRoute);//iska mtlab hoi gya ki userRoute /api/v1/user ko use kar rha hai
+   app.use("/api/v1/product", ProductRoute);
+
+
+  app.use("/uploads",express.static("uploads"));//iska mtlab ki agar ab koi uload folder par jyega wo phot access kae payega
+   app.use(errorMiddleware);
 
   app.listen(port,()=>{
     console.log(` express is running on http://localhost:${port}`);
