@@ -7,6 +7,9 @@ export const errorMiddleware= (err:ErrorHandler,req:Request,res:Response,next:Ne
 
     err.message=err.message || "Internal server error";
     err.statusCode ||=500;
+
+    if(err.name === "CastError") err.message = "Invalid ID";// ye hameisliye add kiye ki jab ham order me singleproduct ko 
+    //get kar rahe the tab hame agar id shi nhi tha to cast error dikha rha tha isliye hamne aisa likha
          
     return res.status( err.statusCode).json({
       success:false,

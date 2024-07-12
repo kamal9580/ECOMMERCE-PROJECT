@@ -129,7 +129,7 @@ export const newProduct=TryCatch(
 
       }
 
-
+ 
     await Product.create({
         name,
         price,
@@ -187,7 +187,7 @@ export const updateProduct=TryCatch(
       
    await product.save();
 
-   await invalidateCache({product: true});
+   await invalidateCache({product: true, productId: String(product._id)});
 
   
     return res.status(200).json({
@@ -206,7 +206,8 @@ export const deleteProduct =TryCatch(async(req,res,next) => {
 });
 
     await product.deleteOne();//isse product delete hogi aur hame photo bhi karni hai wo rm se hogi
-    await invalidateCache({product: true});
+    await invalidateCache({product: true, productId: String(product._id)});
+
 
     return res.status(200).json({
         success: true,
