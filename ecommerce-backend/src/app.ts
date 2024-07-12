@@ -16,6 +16,7 @@ import morgan from "morgan";//this is a middleware
  import userRoute from "./routes/user.js";
  import ProductRoute from "./routes/products.js";
  import orderRoute from "./routes/order.js";
+ import paymentRoute from "./routes/payment.js";
 
  config({
    path: "./.env",
@@ -43,6 +44,8 @@ import morgan from "morgan";//this is a middleware
    app.use("/api/v1/user", userRoute);//iska mtlab hoi gya ki userRoute /api/v1/user ko use kar rha hai
    app.use("/api/v1/product", ProductRoute);
    app.use("/api/v1/order", orderRoute);
+   app.use("/api/v1/payment", paymentRoute);
+
 
 
 

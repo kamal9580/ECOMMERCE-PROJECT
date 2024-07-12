@@ -14,7 +14,7 @@ export const adminOnly=TryCatch(async(req,res,next)=> {
     const user=await User.findById(id);
     if(!user) return next(new ErrorHandler("you give fake id",401));
 
-    if(user.role !=="admin") return next(new ErrorHandler("its not the admin",401));
+    if(user.role !=="admin") return next(new ErrorHandler("its not the admin",403));
 
     next(); //agar apan sirf next pass karege to chain me dekhege ki route me iske next wala access ho jayega
     
