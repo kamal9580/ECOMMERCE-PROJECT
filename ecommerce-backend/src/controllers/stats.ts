@@ -3,7 +3,7 @@ import { TryCatch } from "../middlewares/error.js";
 import { Order } from "../models/order.js";
 import { Product } from "../models/product.js";
 import { User } from "../models/user.js";
-import { calculatePercentage } from "../utils/features.js";
+import { calculatePercentage, getInventories } from "../utils/features.js";
 
 
 export const getDashboardStats= TryCatch(async (req,res,next) => {
@@ -15,6 +15,9 @@ export const getDashboardStats= TryCatch(async (req,res,next) => {
     else{
         
         const today= new Date();
+        const sixMonthsAgo = new Date();
+        sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+        //ye hamne kiya hai ki sixmonth me hamne st kardiya 6 month pahle ka month
   
     const thisMonth = {
         start: new Date(today.getFullYear(), today.getMonth(), 1),
@@ -77,6 +80,18 @@ export const getDashboardStats= TryCatch(async (req,res,next) => {
 
      //ye ham promise.all karege isse sari promise parallely chalegi
 
+     const lastSixMonthOrdersPromise = Order.find({
+      createdAt: {
+        $gte: sixMonthsAgo,
+        $lte: today,
+      },
+    });
+
+    const latestTransactionsPromise = Order.find({})
+    .select(["orderItems", "discount", "total", "status"])
+    .limit(4);
+
+
      const [
       thisMonthProducts,
       thisMonthUsers,
@@ -87,6 +102,10 @@ export const getDashboardStats= TryCatch(async (req,res,next) => {
       productsCount,
       usersCount,
       allOrders,
+      lastSixMonthOrders,
+      categories,
+      femaleUsersCount,
+      latestTransaction,
      ] =await Promise.all([
       thisMonthProductsPromise,
       thisMonthUsersPromise,
@@ -97,6 +116,10 @@ export const getDashboardStats= TryCatch(async (req,res,next) => {
       Product.countDocuments(),
       User.countDocuments(),
       Order.find({}).select("total"),
+      lastSixMonthOrdersPromise,
+      Product.distinct("category"),
+      User.countDocuments({ gender: "female" }),
+      latestTransactionsPromise,
      ]);
 
      //The reduce method is used to aggregate the values in an array into a single value. It iterates over each element in the array and applies a function that takes an accumulator (total in this case) and the current element (order).
@@ -142,14 +165,56 @@ export const getDashboardStats= TryCatch(async (req,res,next) => {
       order: allOrders.length,
     };
 
+    const orderMonthCounts = new Array(6).fill(0);
+    const orderMonthyRevenue = new Array(6).fill(0);
+
+    lastSixMonthOrders.forEach((order) => {
+      const creationDate = order.createdAt;
+      const monthDiff = (today.getMonth() - creationDate.getMonth() + 12) % 12;
+
+      if (monthDiff < 6) {
+        orderMonthCounts[6 - monthDiff - 1] += 1;
+        orderMonthyRevenue[6 - monthDiff - 1] += order.total;
+      }
+    });
+
+  
+    const categoryCount=await
+    getInventories({
+      categories,
+      productsCount,
+    });
+
+    const userRatio = {
+      male: usersCount - femaleUsersCount,
+      female: femaleUsersCount,
+    };
+
+    const modifiedLatestTransaction = latestTransaction.map((i) => ({
+      _id: i._id,
+      discount: i.discount,
+      amount: i.total,
+      quantity: i.orderItems.length,
+      status: i.status,
+    }));
+
+
     
      stats={
+        categoryCount,
         changePercent,
         count,
+        chart:{
+          order: orderMonthCounts,
+          revenue: orderMonthyRevenue,
+        },
+        userRatio,
+
+        latestTransaction: modifiedLatestTransaction,
      };
 
 
-
+      myCache.set("admin-stats",JSON.stringify(stats));
   
     }
 
@@ -161,7 +226,120 @@ export const getDashboardStats= TryCatch(async (req,res,next) => {
     });
 });
 
-export const getPieCharts= TryCatch(async () => {});
+export const getPieCharts= TryCatch(async (req,res,next) => {
+
+  let charts;
+
+  if(myCache.has("admin-pie-charts"))
+    charts=JSON.parse(myCache.get("admin-pie-charts") as string);
+
+  else{
+
+    const allOrderPromise = Order.find({}).select([
+      "total",
+      "discount",
+      "subtotal",
+      "tax",
+      "shippingCharges",
+    ]);
+
+
+    const [
+      processingOrder,
+      shippedOrder,
+      deliveredOrder,
+      categories,
+      productsCount,
+      outOfStock,
+      allOrders,
+      // allUsers,
+      // adminUsers,
+      // customerUsers,
+    ] = await Promise.all([
+      Order.countDocuments({ status: "Processing" }),
+      Order.countDocuments({ status: "Shipped" }),
+      Order.countDocuments({ status: "Delivered" }),
+      Product.distinct("category"),
+      Product.countDocuments(),
+      Product.countDocuments({ stock: 0 }),
+      allOrderPromise,
+      // User.find({}).select(["dob"]),
+      // User.countDocuments({ role: "admin" }),
+      // User.countDocuments({ role: "user" }),
+    ]);
+
+    const orderFullfillment = {
+      processing: processingOrder,
+      shipped: shippedOrder,
+      delivered: deliveredOrder,
+    };
+
+    const productCategories = await getInventories({
+      categories,
+      productsCount,
+    });
+
+    const stockAvailablity = {
+      inStock: productsCount - outOfStock,
+      outOfStock,
+    };
+
+    const grossIncome = allOrders.reduce(
+      (prev, order) => prev + (order.total || 0),
+      0
+    );
+
+    const discount = allOrders.reduce(
+      (prev, order) => prev + (order.discount || 0),
+      0
+    );
+
+    const productionCost = allOrders.reduce(
+      (prev, order) => prev + (order.shippingCharges || 0),
+      0
+    );
+
+    const burnt = allOrders.reduce(
+      (prev, order) => prev + (order.tax || 0), 0);
+
+    const marketingCost = Math.round(grossIncome * (30 / 100));
+
+    const netMargin =
+      grossIncome - discount - productionCost - burnt - marketingCost;
+
+    const revenueDistribution = {
+      netMargin,
+      discount,
+      productionCost,
+      burnt,
+      marketingCost,
+    };// ye ek revenueDistributuin ka object bnaya hai jisme ye ye chiz honge aur upar reduce methoud ki help se nikala hai
+
+
+
+    charts={
+      orderFullfillment,
+      productCategories,
+      stockAvailablity,
+      revenueDistribution,
+    };
+
+    myCache.set("admin-pie-charts",JSON.stringify(charts));
+
+   
+
+  }
+
+  return res.status(200).json({
+    success:true,
+    charts,
+  });
+
+});
+
+
+
+
 export const getBarCharts= TryCatch(async () => {});
 export const getLineCharts= TryCatch(async () => {});
 
