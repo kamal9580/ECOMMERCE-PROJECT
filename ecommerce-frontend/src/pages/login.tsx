@@ -6,6 +6,8 @@ const Login = () => {
     const [gender,setGender] = useState("");
     const [date,setDate] = useState("");
 
+    const loginHandler = () => {};
+
   return (
     <div className="login">
         <main>
@@ -32,7 +34,7 @@ const Login = () => {
 
         <div>
             <p>Already Signed In Once</p>
-            <button>
+            <button onClick={loginHandler}>
                 <FcGoogle /> <span>Sign in with Google</span>
             </button>
         </div>
