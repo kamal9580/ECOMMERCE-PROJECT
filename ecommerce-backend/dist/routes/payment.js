@@ -1,7 +1,9 @@
 import express from "express";
 import { adminOnly } from "../middlewares/auth.js";
-import { allCoupons, applyDiscount, deleteCoupon, newCoupon } from "../controllers/payment.js";
+import { allCoupons, applyDiscount, createPaymentIntent, deleteCoupon, newCoupon } from "../controllers/payment.js";
 const app = express.Router();
+//route- /api/v1/payment/coupon/create
+app.post("/create", createPaymentIntent);
 //route- /api/v1/payment/coupon/discount
 app.get("/discount", applyDiscount); // ye get hai ki pahle hamne discount bna liya hai wo database me store ho gya hai 
 //ab ham usko get karege to find ki jo coupon ka name hai uspar discount kitna hai

@@ -1,6 +1,22 @@
+import { stripe } from "../app.js";
 import { TryCatch } from "../middlewares/error.js";
 import { Coupon } from "../models/coupon.js";
 import ErrorHandler from "../utils/utility-class.js";
+export const createPaymentIntent = TryCatch(async (req, res, next) => {
+    const { amount } = req.body;
+    if (!amount)
+        return next(new ErrorHandler("Please enter amount", 400));
+    //stripe.paymentIntents.create() is a method from the Stripe library to create a new payment intent.
+    const paymentIntent = await stripe.paymentIntents.create({
+        amount: Number(amount) * 100,
+        currency: "inr",
+    });
+    // "clientSecret": "pi_3PcprdRrugg92tV01O9JGbuj_secret_gYTPgGlNXmC8ijmk1mamaRRnU"  this client secret help in frontend ki hame jo frontend me card ki payment kholna hota hai wo kiski kholni hai wo kaise pta chalega 
+    return res.status(201).json({
+        success: true,
+        clientSecret: paymentIntent.client_secret,
+    });
+});
 export const newCoupon = TryCatch(async (req, res, next) => {
     const { code, amount } = req.body;
     if (!code || !amount)
