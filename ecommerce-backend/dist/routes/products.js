@@ -12,7 +12,7 @@ app.get("/latest", getLatestProducts);
 //to get all unique categories - /api/v1/product/categories
 app.get("/categories", getAllCategories);
 //to get all products -/api/v1/product/admin-products
-app.get("/admin-products", getAdminProducts);
+app.get("/admin-products", adminOnly, getAdminProducts);
 //to get,update,delete product
 app.route("/:id")
     .get(getSingleProduct)

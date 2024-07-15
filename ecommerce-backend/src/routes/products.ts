@@ -26,7 +26,7 @@ app.get("/latest", getLatestProducts);
 app.get("/categories", getAllCategories);
 
 //to get all products -/api/v1/product/admin-products
-app.get("/admin-products", getAdminProducts);
+app.get("/admin-products", adminOnly,getAdminProducts);
 
 //to get,update,delete product
 app.route("/:id")

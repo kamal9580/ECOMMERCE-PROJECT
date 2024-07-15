@@ -1,5 +1,5 @@
 
-  import mongoose from "mongoose";
+  import mongoose, { Document } from "mongoose";
 import { InvalidateCacheProps, OrderItemType } from "../types/types.js";
 import { Product } from "../models/product.js";
 import { myCache } from "../app.js";
@@ -14,7 +14,7 @@ import { myCache } from "../app.js";
     .catch((e) => console.log(e));
   };
 
-  export const invalidateCache= async({
+  export const invalidateCache= ({
     product,
     order,
     admin,
@@ -50,6 +50,13 @@ import { myCache } from "../app.js";
     }
 
     if(admin){
+
+      myCache.del([
+        "admin-stats",
+        "admin-pie-charts",
+        "admin-bar-charts",
+        "admin-line-charts",
+      ]);
       
     }
 
@@ -68,7 +75,7 @@ import { myCache } from "../app.js";
 
   export const calculatePercentage = (thisMonth: number, lastMonth: number) => {
     if (lastMonth === 0) return thisMonth * 100;
-    const percent = ((thisMonth-lastMonth) / lastMonth) * 100;
+    const percent = ((thisMonth) / lastMonth) * 100;
     return Number(percent.toFixed(0));
   };
 
@@ -100,4 +107,73 @@ import { myCache } from "../app.js";
     return categoryCount;
 
 
+  };
+
+  interface MyDocument extends Document {
+    createdAt: Date;
+    discount?: number;
+    total?: number;
   }
+
+  type FuncProps = {
+    length: number;
+    docArr: MyDocument[];
+    today: Date;
+    property?: "discount" | "total";
+  };
+  
+  export const getChartData = ({
+    length,
+    docArr,
+    today,
+    property,
+  }: FuncProps) => {
+    const data: number[] = new Array(length).fill(0);
+  
+    docArr.forEach((i) => {
+      const creationDate = i.createdAt;
+      const monthDiff = (today.getMonth() - creationDate.getMonth() + 12) % 12;
+  
+      if (monthDiff < length) {
+        if (property) {
+          data[length - monthDiff - 1] += i[property]!;
+        } else {
+          data[length - monthDiff - 1] += 1;
+        }
+      }
+    });
+  
+    return data;
+  };
+
+
+  // interface MyDocument extends Document{
+  //   createdAt: Date;
+  // }
+
+  // type FuncProps = {
+  //   length: number;
+  //   docArr: MyDocument[];
+  //   today:Date
+  // };
+
+
+  // export const getChartData = ({length,docArr,today} : FuncProps) => {
+
+    
+
+  //   const data:number[] = new Array(length).fill(0);
+
+  //      docArr.forEach((i) => {
+  //     const creationDate = i.createdAt;
+  //     const monthDiff = (today.getMonth() - creationDate.getMonth() + 12) % 12;
+
+  //     if (monthDiff < length) {
+  //       data[length - monthDiff - 1] += 1;
+       
+  //     }
+  //   });
+
+  //   return data;
+
+  // }

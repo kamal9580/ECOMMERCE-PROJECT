@@ -88,7 +88,7 @@ export const newProduct = TryCatch(async (req, res, next) => {
         category: category.toLowerCase(),
         photo: photo.path,
     });
-    await invalidateCache({ product: true }); //nya product bante hi purana ko cache se hta do
+    invalidateCache({ product: true, admin: true }); //nya product bante hi purana ko cache se hta do
     return res.status(201).json({
         success: true,
         message: "product created successfully",
@@ -117,7 +117,10 @@ export const updateProduct = TryCatch(async (req, res, next) => {
     if (category)
         product.category = category;
     await product.save();
-    await invalidateCache({ product: true, productId: String(product._id) });
+    invalidateCache({ product: true,
+        productId: String(product._id),
+        admin: true,
+    });
     return res.status(200).json({
         success: true,
         message: "product updated successfully",
@@ -131,7 +134,7 @@ export const deleteProduct = TryCatch(async (req, res, next) => {
         console.log("product photo Deleted");
     });
     await product.deleteOne(); //isse product delete hogi aur hame photo bhi karni hai wo rm se hogi
-    await invalidateCache({ product: true, productId: String(product._id) });
+    invalidateCache({ product: true, productId: String(product._id), admin: true });
     return res.status(200).json({
         success: true,
         message: "product deleted successfully",
