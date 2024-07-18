@@ -19,3 +19,7 @@ const firebaseConfig = {
 
  //firebase ham isliye hai dale hai ki taki ham google auth use kar sake aur firebase ki yhi best bat hai ki hame alag se 
  //api google auth ki nhi bnani padti hai 
+
+
+ //initializeApp is imported from the firebase/app module. This function is used to initialize a Firebase application with the provided configuration.
+//getAuth is imported from the firebase/auth module. This function is used to set up Firebase Authentication and get an instance of the authentication service.

@@ -5,6 +5,7 @@ import { BrowserRouter as Router,Routes,Route } from "react-router-dom";
 import {  lazy,Suspense } from "react";
 import Loader from "./components/loader";
 import Header from "./components/header";
+import {Toaster} from "react-hot-toast";
 
 
 
@@ -109,6 +110,9 @@ const App = () => {
 
           </Routes>
        </Suspense>
+
+       <Toaster position="bottom-center"/>
+       {/* The Toaster component from the react-hot-toast library is used in a React application to display toast notifications. Toast notifications are small, unobtrusive pop-up messages that provide feedback or updates to the user, such as successful operations, error messages, or other alerts. */}
      </Router>
   )
 }
