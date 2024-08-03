@@ -8,6 +8,7 @@ import NodeCache from "node-cache";
 import { config } from "dotenv";
 import morgan from "morgan"; //this is a middleware
 import Stripe from "stripe";
+import cors from "cors";
 //importing routes
 import userRoute from "./routes/user.js";
 import ProductRoute from "./routes/products.js";
@@ -26,6 +27,14 @@ export const myCache = new NodeCache();
 const app = express();
 app.use(express.json());
 app.use(morgan("dev")); //kya kya request hamne send kia hai wo btata hai hame
+// app.use(
+//   cors({
+//     origin: "http://localhost:5173",
+//     methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
+//     credentials: true,
+//   })
+// );
+app.use(cors());
 app.get("/", (req, res) => {
     res.send("apt working with /api/v1");
 });
