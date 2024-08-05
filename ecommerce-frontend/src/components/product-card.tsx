@@ -1,4 +1,5 @@
 import { FaPlus } from "react-icons/fa";
+import { server } from "../redux/store";
 
    
    type ProductProps = {
@@ -34,7 +35,7 @@ const ProductCard = ({
   return (
       <div className="product-card">
 
-        <img src={photo} alt="{name}" /> {/*src={${server}/${photo}}: Constructs the src attribute of the img tag by combining the server URL and the photo path using a template literal. This ensures the full URL of the image is correctly formed. */}
+        <img src={`${server}/${photo}`} alt="{name}" /> {/*src={${server}/${photo}}: Constructs the src attribute of the img tag by combining the server URL and the photo path using a template literal. This ensures the full URL of the image is correctly formed. */}
         <p> {name}</p>
         <span>₹{price}</span>
         

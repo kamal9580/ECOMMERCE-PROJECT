@@ -1,11 +1,26 @@
 import { Link } from "react-router-dom";
 import ProductCard from "../components/product-card";
+import { useLatestProductsQuery } from "../redux/api/productApi";
+import toast from "react-hot-toast";
+import { useDispatch } from "react-redux";
+import Loader from "../components/loader";
 
 
 const Home = () => {
 
-  const addToCartHandler = ()=> {};
+  const { data, isError, isLoading } = useLatestProductsQuery("");
 
+  const dispatch = useDispatch();
+
+  const addToCartHandler = (cartItem: CartItem) => {
+    if (cartItem.stock < 1) return toast.error("Out of Stock");
+    dispatch(addToCart(cartItem));
+    toast.success("Added to cart");
+  };
+
+  if (isError) toast.error("Cannot Fetch the Products");
+
+  
   return (
     <div className="home">
 
@@ -19,18 +34,22 @@ const Home = () => {
 
     <main> 
 
-     <ProductCard
+       {isLoading? (
+         <Loader />
        
-       productId="adasdas"
-       price={4545}
-       name="Macbook"
-      photo="https://m.media-amazon.com/images/I/71jG+e7roXL._SX522_.jpg"
-       stock={435}
-       handler={addToCartHandler}
-       
-      
-      
-      />
+       ) : ( data?.products.map((i) => (
+
+             <ProductCard
+                key={i._id}
+                productId={i._id}
+                name={i.name}
+                price={i.price}
+                stock={i.stock}
+                handler={addToCartHandler}
+                photos={i.photos}
+              />
+       ))
+      )}
     </main>
 
     </div>
