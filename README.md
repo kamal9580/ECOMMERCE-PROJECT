@@ -9,15 +9,6 @@ included real-time charts for tracking revenue, visitor metrics, and inventory**
 
 This project has a admin page which is a crucial component of the E-commerce project. It provides a centralized interface for managing various aspects of the online store, ensuring smooth operation and efficient management.
 
-## Features
-
--   User authentication with Google (Firebase)
--   Product listing and detailed views
--   Shopping cart functionality
--   Order management
--   Admin panel for managing products
--   Responsive design
--   API integration with RTK Query
 
 
 ## Features
